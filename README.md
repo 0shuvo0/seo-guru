@@ -1,10 +1,9 @@
 # SEO GURU 🔍
 
-![SEO GURU Preview](preview.png)
+![SEO GURU Preview](preview.gif)
 
 A comprehensive, instant SEO analysis platform that provides visual insights into website performance using free, open-source tools. No sign-up required!
 
-https://github.com/0shuvo0/seo-guru/assets/preview.mov
 
 ## 🚀 Features
 
