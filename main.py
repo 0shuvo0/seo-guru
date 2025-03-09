@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS with animations
+# Custom CSS with animations and responsive design
 st.markdown("""
     <style>
     @keyframes slideIn {
@@ -38,6 +38,8 @@ st.markdown("""
     .stTextInput > div > div > input {
         background-color: #262730;
         color: #FAFAFA;
+        width: 100%;
+        max-width: 800px;
     }
 
     .metric-card {
@@ -46,6 +48,8 @@ st.markdown("""
         border-radius: 0.5rem;
         margin: 0.5rem 0;
         animation: slideIn 0.5s ease-out;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .category-title {
@@ -53,10 +57,13 @@ st.markdown("""
         font-size: 1.2rem;
         margin-bottom: 0.5rem;
         animation: fadeIn 0.5s ease-out;
+        word-wrap: break-word;
     }
 
     .analysis-section {
         animation: slideIn 0.5s ease-out;
+        margin-bottom: 2rem;
+        width: 100%;
     }
 
     .stMarkdown {
@@ -67,14 +74,60 @@ st.markdown("""
         animation: fadeIn 1s ease-out;
     }
 
+    /* Responsive layout adjustments */
+    @media (max-width: 768px) {
+        .stColumns {
+            flex-direction: column;
+        }
+
+        [data-testid="column"] {
+            width: 100% !important;
+            margin-bottom: 1rem;
+        }
+
+        .metric-card {
+            margin: 0.5rem 0;
+        }
+
+        h1 {
+            font-size: 1.8rem !important;
+        }
+
+        h2 {
+            font-size: 1.5rem !important;
+        }
+
+        h3 {
+            font-size: 1.2rem !important;
+        }
+    }
+
+    /* Chart responsiveness */
+    [data-testid="stPlotlyChart"] {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Expandable sections responsiveness */
+    .streamlit-expanderHeader {
+        word-wrap: break-word;
+        white-space: normal !important;
+    }
+
+    /* Container padding for better mobile view */
+    .element-container {
+        padding: 0 1rem;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# Header
+# Header with responsive container
+st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
 st.title("🔍 SEO GURU")
 st.markdown("### Comprehensive SEO Analysis Tool")
+st.markdown("</div>", unsafe_allow_html=True)
 
-# URL Input
+# URL Input with max width
 url = st.text_input("Enter website URL", placeholder="https://example.com")
 
 if url:
@@ -83,7 +136,7 @@ if url:
     else:
         with st.spinner("Analyzing website... This may take a minute"):
             try:
-                # Show progress bar
+                # Progress indicators
                 progress_bar = st.progress(0)
                 status_text = st.empty()
 
@@ -91,7 +144,7 @@ if url:
                 analyzer = SEOAnalyzer(url)
                 status_text.text("Initializing analysis...")
                 progress_bar.progress(20)
-                time.sleep(0.3)  # Small delay for visual effect
+                time.sleep(0.3)
 
                 # Perform analysis
                 status_text.text("Analyzing website content...")
@@ -112,50 +165,50 @@ if url:
                 progress_bar.empty()
                 status_text.empty()
 
-                # Layout with staggered animations
-                col1, col2 = st.columns([2, 1])
+                # Responsive layout
+                with st.container():
+                    # Main metrics section
+                    st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
 
-                with col1:
-                    with st.container():
-                        st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
+                    # Use smaller columns on mobile
+                    if st.columns([1])[0].checkbox("View detailed view", value=True):
+                        col1, col2 = st.columns([2, 1])
+                    else:
+                        col1, col2 = st.columns([1, 1])
+
+                    with col1:
                         st.markdown("### Overall SEO Score")
                         create_score_gauge(results['overall_score'])
-                        st.markdown("</div>", unsafe_allow_html=True)
                         time.sleep(0.2)
 
-                    with st.container():
-                        st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
                         st.markdown("### Performance Metrics")
                         create_metrics_chart(results['metrics'])
-                        st.markdown("</div>", unsafe_allow_html=True)
                         time.sleep(0.2)
 
-                with col2:
-                    st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
-                    st.markdown("### Quick Stats")
-                    st.metric("Page Load Time", f"{results['load_time']:.2f}s")
-                    time.sleep(0.1)
-                    st.metric("Mobile Friendly", "✅ Yes" if results['mobile_friendly'] else "❌ No")
-                    time.sleep(0.1)
-                    st.metric("SSL Certified", "✅ Yes" if results['ssl_certified'] else "❌ No")
+                    with col2:
+                        st.markdown("### Quick Stats")
+                        st.metric("Page Load Time", f"{results['load_time']:.2f}s")
+                        time.sleep(0.1)
+                        st.metric("Mobile Friendly", "✅ Yes" if results['mobile_friendly'] else "❌ No")
+                        time.sleep(0.1)
+                        st.metric("SSL Certified", "✅ Yes" if results['ssl_certified'] else "❌ No")
+
                     st.markdown("</div>", unsafe_allow_html=True)
 
-                # Detailed Analysis Sections
+                # Detailed Analysis in tabs
                 st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
                 st.markdown("### Detailed Analysis")
-                st.markdown("</div>", unsafe_allow_html=True)
 
-                tabs = st.tabs([
-                    "Meta Tags", "Content", "Technical", 
-                    "Speed", "Security", "Links", "Improvements"
-                ])
+                # Make tabs more readable on mobile
+                tab_names = ["Meta", "Content", "Tech", "Speed", "Security", "Links", "Improve"]
+                tabs = st.tabs(tab_names)
 
                 # Meta Tags Analysis
                 with tabs[0]:
                     st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
                     st.markdown("#### 🏷️ Meta Tags Analysis")
                     for item in results['meta_analysis']:
-                        time.sleep(0.1)  # Slight delay for staggered appearance
+                        time.sleep(0.1)
                         if "optimal" in item.lower() or "found" in item.lower():
                             st.success(item)
                         elif "missing" in item.lower() or "too" in item.lower():
@@ -181,7 +234,11 @@ if url:
                                 metrics[category] = []
                             metrics[category].append(item)
 
-                    col1, col2 = st.columns(2)
+                    # Responsive columns for content metrics
+                    if len(metrics) > 3:
+                        col1, col2 = st.columns(2)
+                    else:
+                        col1, col2 = st.columns([2, 1])
 
                     with col1:
                         st.markdown("##### Content Metrics")
@@ -198,30 +255,41 @@ if url:
                             st.write(item)
                     st.markdown("</div>", unsafe_allow_html=True)
 
-                # Technical Analysis
+                # Technical Analysis with responsive columns
                 with tabs[2]:
                     st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
                     st.markdown("#### ⚙️ Technical Analysis")
-                    col1, col2 = st.columns(2)
 
                     technical_items = results['technical_analysis']
                     mid = len(technical_items) // 2
 
-                    with col1:
-                        for item in technical_items[:mid]:
+                    # Single column on mobile
+                    if len(technical_items) > 6:
+                        col1, col2 = st.columns(2)
+
+                        with col1:
+                            for item in technical_items[:mid]:
+                                time.sleep(0.1)
+                                if "not" in item.lower() or "needs" in item.lower():
+                                    st.error(item)
+                                else:
+                                    st.success(item)
+
+                        with col2:
+                            for item in technical_items[mid:]:
+                                time.sleep(0.1)
+                                if "not" in item.lower() or "needs" in item.lower():
+                                    st.error(item)
+                                else:
+                                    st.success(item)
+                    else:
+                        for item in technical_items:
                             time.sleep(0.1)
                             if "not" in item.lower() or "needs" in item.lower():
                                 st.error(item)
                             else:
                                 st.success(item)
 
-                    with col2:
-                        for item in technical_items[mid:]:
-                            time.sleep(0.1)
-                            if "not" in item.lower() or "needs" in item.lower():
-                                st.error(item)
-                            else:
-                                st.success(item)
                     st.markdown("</div>", unsafe_allow_html=True)
 
                 # Speed Analysis
@@ -260,7 +328,7 @@ if url:
                             st.info(item)
                     st.markdown("</div>", unsafe_allow_html=True)
 
-                # Improvements
+                # Improvements with better grouping
                 with tabs[6]:
                     st.markdown('<div class="analysis-section">', unsafe_allow_html=True)
                     st.markdown("#### 📈 Improvement Suggestions")
@@ -272,11 +340,21 @@ if url:
                             grouped_improvements[category] = []
                         grouped_improvements[category].append(item[item.find(']')+1:].strip())
 
-                    for category, improvements in grouped_improvements.items():
-                        time.sleep(0.1)
-                        with st.expander(f"{category} Improvements", expanded=True):
-                            for improvement in improvements:
-                                st.markdown(f"🔸 {improvement}")
+                    # Show improvements in a more compact way on mobile
+                    if len(grouped_improvements) > 4:
+                        cols = st.columns(2)
+                        for idx, (category, improvements) in enumerate(grouped_improvements.items()):
+                            with cols[idx % 2]:
+                                time.sleep(0.1)
+                                with st.expander(f"{category} Improvements", expanded=True):
+                                    for improvement in improvements:
+                                        st.markdown(f"🔸 {improvement}")
+                    else:
+                        for category, improvements in grouped_improvements.items():
+                            time.sleep(0.1)
+                            with st.expander(f"{category} Improvements", expanded=True):
+                                for improvement in improvements:
+                                    st.markdown(f"🔸 {improvement}")
                     st.markdown("</div>", unsafe_allow_html=True)
 
             except Exception as e:
